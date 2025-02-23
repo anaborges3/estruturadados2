@@ -1,13 +1,12 @@
-public class Ex01 {
-    
-    // 1. Fatorial Recursivo
+package br.edu.ifgoiano.recursividade;
+
+public class Main {
+
     public static int fatorial(int n) {
         if (n == 0 || n == 1) return 1;
         return n * fatorial(n - 1);
     }
-    
-    // Método principal para testes
     public static void main(String[] args) {
-        System.out.println("Fatorial de 5: " + fatorial(5));
+        System.out.println("Fatorial de 5: " + fatorial(5);
     }
 }
