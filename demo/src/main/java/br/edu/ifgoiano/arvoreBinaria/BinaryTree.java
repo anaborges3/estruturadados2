@@ -12,32 +12,33 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         if (elements == null || elements.length == 0) {
             return null;
         }
-        
+
         Node<T> root = new Node<>(elements[0]);
         for (int i = 1; i < elements.length; i++) {
-            insertNode(root, elements[i]);
+            insert(root, elements[i]);
         }
         return root;
     }
 
-    private void insertNode(Node<T> root, T element) {
+    @Override
+    public void insert(Node<T> root, T element) {
         if (element.compareTo(root.getValue()) < 0) {
             if (root.getLeft() == null) {
                 root.setLeft(new Node<>(element));
             } else {
-                insertNode(root.getLeft(), element);
+                insert(root.getLeft(), element);
             }
         } else {
             if (root.getRight() == null) {
                 root.setRight(new Node<>(element));
             } else {
-                insertNode(root.getRight(), element);
+                insert(root.getRight(), element);
             }
         }
     }
 
     @Override
-    public int calculateTreeDepth(Node<T> rootNode) {
+    public Integer calculateTreeDepth(Node<T> rootNode) {
         if (rootNode == null) {
             return 0;
         }
@@ -56,7 +57,7 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         if (node.getValue().equals(element)) {
             return level;
         }
-        
+
         int leftLevel = getNodeLevel(node.getLeft(), element, level + 1);
         if (leftLevel != -1) {
             return leftLevel;
@@ -65,11 +66,99 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
     }
 
     @Override
+    public Node<T> getByElement(Node<T> rootNode, T element) {
+        if (rootNode == null || rootNode.getValue().equals(element)) {
+            return rootNode;
+        }
+        if (element.compareTo(rootNode.getValue()) < 0) {
+            return getByElement(rootNode.getLeft(), element);
+        } else {
+            return getByElement(rootNode.getRight(), element);
+        }
+    }
+
+    @Override
+    public Node<T> getFather(Node<T> rootNode, T element) {
+        if (rootNode == null || rootNode.getLeft() == null && rootNode.getRight() == null) {
+            return null;
+        }
+        if ((rootNode.getLeft() != null && rootNode.getLeft().getValue().equals(element)) ||
+                (rootNode.getRight() != null && rootNode.getRight().getValue().equals(element))) {
+            return rootNode;
+        }
+        if (element.compareTo(rootNode.getValue()) < 0) {
+            return getFather(rootNode.getLeft(), element);
+        } else {
+            return getFather(rootNode.getRight(), element);
+        }
+    }
+
+    @Override
+    public Node<T> getBrother(Node<T> rootNode, T element) {
+        Node<T> father = getFather(rootNode, element);
+        if (father == null) {
+            return null;
+        }
+        if (father.getLeft() != null && father.getLeft().getValue().equals(element)) {
+            return father.getRight();
+        } else {
+            return father.getLeft();
+        }
+    }
+
+    @Override
+    public Integer degree(Node<T> rootNode, T element) {
+        Node<T> node = getByElement(rootNode, element);
+        if (node == null) {
+            return 0;
+        }
+        int degree = 0;
+        if (node.getLeft() != null)
+            degree++;
+        if (node.getRight() != null)
+            degree++;
+        return degree;
+    }
+
+    @Override
+    public void remove(Node<T> rootNode, T element) {
+        rootNode = removeNode(rootNode, element);
+    }
+
+    private Node<T> removeNode(Node<T> rootNode, T element) {
+        if (rootNode == null) {
+            return null;
+        }
+        if (element.compareTo(rootNode.getValue()) < 0) {
+            rootNode.setLeft(removeNode(rootNode.getLeft(), element));
+        } else if (element.compareTo(rootNode.getValue()) > 0) {
+            rootNode.setRight(removeNode(rootNode.getRight(), element));
+        } else {
+            if (rootNode.getLeft() == null) {
+                return rootNode.getRight();
+            } else if (rootNode.getRight() == null) {
+                return rootNode.getLeft();
+            }
+            Node<T> minNode = findMin(rootNode.getRight());
+            rootNode.setValue(minNode.getValue());
+            rootNode.setRight(removeNode(rootNode.getRight(), minNode.getValue()));
+        }
+        return rootNode;
+    }
+
+    private Node<T> findMin(Node<T> node) {
+        while (node.getLeft() != null) {
+            node = node.getLeft();
+        }
+        return node;
+    }
+
+    @Override
     public String toString(Node<T> rootNode) {
         if (rootNode == null) {
             return "";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("root:").append(rootNode.getValue());
         if (rootNode.getLeft() != null || rootNode.getRight() != null) {
@@ -79,4 +168,3 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         return sb.toString();
     }
 }
-
