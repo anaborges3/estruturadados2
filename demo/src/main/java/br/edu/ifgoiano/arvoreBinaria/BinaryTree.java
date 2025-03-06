@@ -1,42 +1,47 @@
 package br.edu.ifgoiano.arvoreBinaria;
 
+// Implementação de uma Árvore Binária de Busca (BST) genérica
 public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
 
+    // Método para criar uma árvore com um único elemento
     @Override
     public Node<T> createTree(T element) {
         return new Node<>(element);
     }
 
+    // Método para criar uma árvore a partir de um array de elementos
     @Override
     public Node<T> createTree(T[] elements) {
         if (elements == null || elements.length == 0) {
-            return null;
+            return null; // Retorna null se o array estiver vazio
         }
 
-        Node<T> root = new Node<>(elements[0]);
+        Node<T> root = new Node<>(elements[0]); // Define o primeiro elemento como raiz
         for (int i = 1; i < elements.length; i++) {
-            insert(root, elements[i]);
+            insert(root, elements[i]); // Insere os elementos subsequentes
         }
         return root;
     }
 
+    // Método para inserir um elemento na árvore binária de busca
     @Override
     public void insert(Node<T> root, T element) {
         if (element.compareTo(root.getValue()) < 0) {
             if (root.getLeft() == null) {
-                root.setLeft(new Node<>(element));
+                root.setLeft(new Node<>(element)); // Insere na esquerda se estiver vazia
             } else {
-                insert(root.getLeft(), element);
+                insert(root.getLeft(), element); // Recursão para inserção na subárvore esquerda
             }
         } else {
             if (root.getRight() == null) {
-                root.setRight(new Node<>(element));
+                root.setRight(new Node<>(element)); // Insere na direita se estiver vazia
             } else {
-                insert(root.getRight(), element);
+                insert(root.getRight(), element); // Recursão para inserção na subárvore direita
             }
         }
     }
 
+    // Método para calcular a profundidade da árvore
     @Override
     public Integer calculateTreeDepth(Node<T> rootNode) {
         if (rootNode == null) {
@@ -45,6 +50,7 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         return 1 + Math.max(calculateTreeDepth(rootNode.getLeft()), calculateTreeDepth(rootNode.getRight()));
     }
 
+    // Método para calcular o nível de um nó específico
     @Override
     public Integer calculateNodeLevel(Node<T> rootNode, T nodeElement) {
         return getNodeLevel(rootNode, nodeElement, 0);
@@ -52,10 +58,10 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
 
     private Integer getNodeLevel(Node<T> node, T element, int level) {
         if (node == null) {
-            return -1;
+            return -1; // Retorna -1 se o nó não for encontrado
         }
         if (node.getValue().equals(element)) {
-            return level;
+            return level; // Retorna o nível do nó se for encontrado
         }
 
         int leftLevel = getNodeLevel(node.getLeft(), element, level + 1);
@@ -65,6 +71,7 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         return getNodeLevel(node.getRight(), element, level + 1);
     }
 
+    // Método para buscar um nó com um determinado elemento
     @Override
     public Node<T> getByElement(Node<T> rootNode, T element) {
         if (rootNode == null || rootNode.getValue().equals(element)) {
@@ -77,9 +84,10 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         }
     }
 
+    // Método para encontrar o pai de um nó específico
     @Override
     public Node<T> getFather(Node<T> rootNode, T element) {
-        if (rootNode == null || rootNode.getLeft() == null && rootNode.getRight() == null) {
+        if (rootNode == null || rootNode.getValue().equals(element)) {
             return null;
         }
         if ((rootNode.getLeft() != null && rootNode.getLeft().getValue().equals(element)) ||
@@ -93,6 +101,7 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         }
     }
 
+    // Método para encontrar o irmão de um nó específico
     @Override
     public Node<T> getBrother(Node<T> rootNode, T element) {
         Node<T> father = getFather(rootNode, element);
@@ -106,6 +115,7 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         }
     }
 
+    // Método para calcular o grau de um nó (quantidade de filhos)
     @Override
     public Integer degree(Node<T> rootNode, T element) {
         Node<T> node = getByElement(rootNode, element);
@@ -120,30 +130,28 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         return degree;
     }
 
+    // Método para remover um elemento da árvore
     @Override
-    public void remove(Node<T> rootNode, T element) {
-        rootNode = removeNode(rootNode, element);
-    }
-
-    private Node<T> removeNode(Node<T> rootNode, T element) {
+    public boolean remove(Node<T> rootNode, T element) {
         if (rootNode == null) {
-            return null;
+            return false;
         }
+
         if (element.compareTo(rootNode.getValue()) < 0) {
-            rootNode.setLeft(removeNode(rootNode.getLeft(), element));
+            rootNode.setLeft(remove(rootNode.getLeft(), element) ? rootNode.getLeft() : null);
         } else if (element.compareTo(rootNode.getValue()) > 0) {
-            rootNode.setRight(removeNode(rootNode.getRight(), element));
+            rootNode.setRight(remove(rootNode.getRight(), element) ? rootNode.getRight() : null);
         } else {
             if (rootNode.getLeft() == null) {
-                return rootNode.getRight();
+                return rootNode.getRight() != null;
             } else if (rootNode.getRight() == null) {
-                return rootNode.getLeft();
+                return rootNode.getLeft() != null;
             }
             Node<T> minNode = findMin(rootNode.getRight());
             rootNode.setValue(minNode.getValue());
-            rootNode.setRight(removeNode(rootNode.getRight(), minNode.getValue()));
+            rootNode.setRight(remove(rootNode.getRight(), minNode.getValue()) ? rootNode.getRight() : null);
         }
-        return rootNode;
+        return true;
     }
 
     private Node<T> findMin(Node<T> node) {
@@ -153,6 +161,7 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         return node;
     }
 
+    // Método para gerar a representação em string da árvore
     @Override
     public String toString(Node<T> rootNode) {
         if (rootNode == null) {
