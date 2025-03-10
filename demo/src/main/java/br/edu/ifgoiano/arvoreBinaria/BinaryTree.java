@@ -41,6 +41,95 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
         }
     }
 
+    // Método para remover um elemento da árvore garantindo a reorganização correta
+    @Override
+    public boolean remove(Node<T> rootNode, T element) {
+        return removeNode(rootNode, element) != null;
+    }
+
+    private Node<T> removeNode(Node<T> rootNode, T element) {
+        if (rootNode == null) {
+            return null;
+        }
+        if (element.compareTo(rootNode.getValue()) < 0) {
+            rootNode.setLeft(removeNode(rootNode.getLeft(), element));
+        } else if (element.compareTo(rootNode.getValue()) > 0) {
+            rootNode.setRight(removeNode(rootNode.getRight(), element));
+        } else {
+            if (rootNode.getLeft() == null) {
+                return rootNode.getRight();
+            } else if (rootNode.getRight() == null) {
+                return rootNode.getLeft();
+            }
+            Node<T> minNode = findMin(rootNode.getRight());
+            rootNode.setValue(minNode.getValue());
+            rootNode.setRight(removeNode(rootNode.getRight(), minNode.getValue()));
+        }
+        return rootNode;
+    }
+
+    private Node<T> findMin(Node<T> node) {
+        while (node.getLeft() != null) {
+            node = node.getLeft();
+        }
+        return node;
+    }
+
+    @Override
+    public Node<T> getByElement(Node<T> rootNode, T element) {
+        if (rootNode == null || rootNode.getValue().equals(element)) {
+            return rootNode;
+        }
+        if (element.compareTo(rootNode.getValue()) < 0) {
+            return getByElement(rootNode.getLeft(), element);
+        } else {
+            return getByElement(rootNode.getRight(), element);
+        }
+    }
+
+    @Override
+    public Node<T> getFather(Node<T> rootNode, T element) {
+        if (rootNode == null || rootNode.getValue().equals(element)) {
+            return null;
+        }
+        if ((rootNode.getLeft() != null && rootNode.getLeft().getValue().equals(element)) ||
+                (rootNode.getRight() != null && rootNode.getRight().getValue().equals(element))) {
+            return rootNode;
+        }
+        if (element.compareTo(rootNode.getValue()) < 0) {
+            return getFather(rootNode.getLeft(), element);
+        } else {
+            return getFather(rootNode.getRight(), element);
+        }
+    }
+
+    @Override
+    public Node<T> getBrother(Node<T> rootNode, T element) {
+        Node<T> father = getFather(rootNode, element);
+        if (father == null) {
+            return null;
+        }
+        if (father.getLeft() != null && father.getLeft().getValue().equals(element)) {
+            return father.getRight();
+        } else {
+            return father.getLeft();
+        }
+    }
+
+    @Override
+    public Integer degree(Node<T> rootNode, T element) {
+        Node<T> node = getByElement(rootNode, element);
+        if (node == null) {
+            return 0;
+        }
+        int degree = 0;
+        if (node.getLeft() != null)
+            degree++;
+        if (node.getRight() != null)
+            degree++;
+        return degree;
+    }
+
     // Método para calcular a profundidade da árvore
     @Override
     public Integer calculateTreeDepth(Node<T> rootNode) {
@@ -58,10 +147,10 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
 
     private Integer getNodeLevel(Node<T> node, T element, int level) {
         if (node == null) {
-            return -1; // Retorna -1 se o nó não for encontrado
+            return -1;
         }
         if (node.getValue().equals(element)) {
-            return level; // Retorna o nível do nó se for encontrado
+            return level;
         }
 
         int leftLevel = getNodeLevel(node.getLeft(), element, level + 1);
@@ -69,96 +158,6 @@ public class BinaryTree<T extends Comparable<T>> implements IBinaryTree<T> {
             return leftLevel;
         }
         return getNodeLevel(node.getRight(), element, level + 1);
-    }
-
-    // Método para buscar um nó com um determinado elemento
-    @Override
-    public Node<T> getByElement(Node<T> rootNode, T element) {
-        if (rootNode == null || rootNode.getValue().equals(element)) {
-            return rootNode;
-        }
-        if (element.compareTo(rootNode.getValue()) < 0) {
-            return getByElement(rootNode.getLeft(), element);
-        } else {
-            return getByElement(rootNode.getRight(), element);
-        }
-    }
-
-    // Método para encontrar o pai de um nó específico
-    @Override
-    public Node<T> getFather(Node<T> rootNode, T element) {
-        if (rootNode == null || rootNode.getValue().equals(element)) {
-            return null;
-        }
-        if ((rootNode.getLeft() != null && rootNode.getLeft().getValue().equals(element)) ||
-                (rootNode.getRight() != null && rootNode.getRight().getValue().equals(element))) {
-            return rootNode;
-        }
-        if (element.compareTo(rootNode.getValue()) < 0) {
-            return getFather(rootNode.getLeft(), element);
-        } else {
-            return getFather(rootNode.getRight(), element);
-        }
-    }
-
-    // Método para encontrar o irmão de um nó específico
-    @Override
-    public Node<T> getBrother(Node<T> rootNode, T element) {
-        Node<T> father = getFather(rootNode, element);
-        if (father == null) {
-            return null;
-        }
-        if (father.getLeft() != null && father.getLeft().getValue().equals(element)) {
-            return father.getRight();
-        } else {
-            return father.getLeft();
-        }
-    }
-
-    // Método para calcular o grau de um nó (quantidade de filhos)
-    @Override
-    public Integer degree(Node<T> rootNode, T element) {
-        Node<T> node = getByElement(rootNode, element);
-        if (node == null) {
-            return 0;
-        }
-        int degree = 0;
-        if (node.getLeft() != null)
-            degree++;
-        if (node.getRight() != null)
-            degree++;
-        return degree;
-    }
-
-    // Método para remover um elemento da árvore
-    @Override
-    public boolean remove(Node<T> rootNode, T element) {
-        if (rootNode == null) {
-            return false;
-        }
-
-        if (element.compareTo(rootNode.getValue()) < 0) {
-            rootNode.setLeft(remove(rootNode.getLeft(), element) ? rootNode.getLeft() : null);
-        } else if (element.compareTo(rootNode.getValue()) > 0) {
-            rootNode.setRight(remove(rootNode.getRight(), element) ? rootNode.getRight() : null);
-        } else {
-            if (rootNode.getLeft() == null) {
-                return rootNode.getRight() != null;
-            } else if (rootNode.getRight() == null) {
-                return rootNode.getLeft() != null;
-            }
-            Node<T> minNode = findMin(rootNode.getRight());
-            rootNode.setValue(minNode.getValue());
-            rootNode.setRight(remove(rootNode.getRight(), minNode.getValue()) ? rootNode.getRight() : null);
-        }
-        return true;
-    }
-
-    private Node<T> findMin(Node<T> node) {
-        while (node.getLeft() != null) {
-            node = node.getLeft();
-        }
-        return node;
     }
 
     // Método para gerar a representação em string da árvore
