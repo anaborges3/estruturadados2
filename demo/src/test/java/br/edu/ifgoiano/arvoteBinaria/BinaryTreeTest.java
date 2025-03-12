@@ -32,13 +32,13 @@ class BinaryTreeTest {
     IBinaryTree<Integer> binaryTreeOps = new BinaryTree<>();
     Node<Integer> rootNode = binaryTreeOps.createTree(6);
 
-    assertEquals(binaryTreeOps.toString(rootNode), "root:6 ");
+    assertEquals(binaryTreeOps.toString(rootNode), "root:6");
 
     binaryTreeOps.insert(rootNode, 2);
-    assertEquals(binaryTreeOps.toString(rootNode), "root:6 (left:2 )");
+    assertEquals(binaryTreeOps.toString(rootNode), "root:6 (left:2)");
 
     binaryTreeOps.insert(rootNode, 8);
-    assertEquals(binaryTreeOps.toString(rootNode), "root:6 (left:2 right:8 )");
+    assertEquals(binaryTreeOps.toString(rootNode), "root:6 (left:2 right:8)");
 
     binaryTreeOps.insert(rootNode, 1);
     assertEquals(binaryTreeOps.toString(rootNode), "root:6 (left:2 (left:1 )right:8 )");
