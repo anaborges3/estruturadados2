@@ -4,6 +4,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import br.edu.ifgoiano.arvoreBinaria.IBinaryTree;
+import br.edu.ifgoiano.arvoreBinaria.Node;
+import br.edu.ifgoiano.arvoreBinaria.BinaryTree;
+
+/*
+ * Alunas: 
+ * Ana Carolina Silva Borges
+ * Danielly Maria dos Santos Oliveira
+ * Stéphany Lima Vital
+ */
+
 class BinaryTreeTest {
 
   @Test
