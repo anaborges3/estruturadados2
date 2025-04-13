@@ -10,7 +10,7 @@ import br.edu.ifgoiano.hashing.service.IHashing;
  * @author: Ana Carolina Silva Borges; Danielly Maria dos Santos Oliveira; Stephany Lima Vital
  * @date: 2025-04-13
  * @description: implementação do arquivo executável do projeto de Hashing. Solicitado no Ex 4 do trabalho de Estruturas de Dados II.
- * @version: 1.0
+ * @version: 1.1
  */
 
 public class Main {
