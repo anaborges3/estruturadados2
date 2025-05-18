@@ -3,85 +3,107 @@ package br.edu.ifgoiano.grafos;
 import java.util.*;
 
 public class Grafo {
-    private final Map<Vertice, Set<Vertice>> adjacencias = new HashMap<>();
+    private final Map<Vertice, List<Aresta>> adjacencias = new HashMap<>();
+    private final boolean direcionado;
 
-    public void adicionarVertice(String nome) {
-        adjacencias.putIfAbsent(new Vertice(nome), new HashSet<>());
+    public Grafo() {
+        this(false);
     }
 
-    public void adicionarAresta(String origem, String destino) {
+    public Grafo(boolean direcionado) {
+        this.direcionado = direcionado;
+    }
+
+    public void adicionarVertice(String nome) {
+        adjacencias.putIfAbsent(new Vertice(nome), new ArrayList<>());
+    }
+
+    public void adicionarAresta(String origem, String destino, double peso) {
         Vertice v1 = new Vertice(origem);
         Vertice v2 = new Vertice(destino);
-        adjacencias.get(v1).add(v2);
-        adjacencias.get(v2).add(v1); // bidirecional
+        adjacencias.get(v1).add(new Aresta(v2, peso));
+
+        if (!direcionado && !v1.equals(v2)) {
+            adjacencias.get(v2).add(new Aresta(v1, peso));
+        }
+    }
+
+    // Dijkstra para menor caminho
+    public List<String> menorCaminho(String origem, String destino) {
+        Vertice inicio = new Vertice(origem);
+        Vertice fim = new Vertice(destino);
+
+        Map<Vertice, Double> distancias = new HashMap<>();
+        Map<Vertice, Vertice> anteriores = new HashMap<>();
+        PriorityQueue<Vertice> fila = new PriorityQueue<>(Comparator.comparingDouble(distancias::get));
+
+        for (Vertice v : adjacencias.keySet()) {
+            distancias.put(v, Double.POSITIVE_INFINITY);
+            anteriores.put(v, null);
+        }
+        distancias.put(inicio, 0.0);
+        fila.add(inicio);
+
+        while (!fila.isEmpty()) {
+            Vertice atual = fila.poll();
+            for (Aresta aresta : adjacencias.getOrDefault(atual, new ArrayList<>())) {
+                Vertice vizinho = aresta.getDestino();
+                double novaDist = distancias.get(atual) + aresta.getPeso();
+                if (novaDist < distancias.get(vizinho)) {
+                    distancias.put(vizinho, novaDist);
+                    anteriores.put(vizinho, atual);
+                    fila.add(vizinho);
+                }
+            }
+        }
+
+        // Reconstroi o caminho
+        List<String> caminho = new LinkedList<>();
+        for (Vertice v = fim; v != null; v = anteriores.get(v)) {
+            caminho.add(0, v.getNome());
+        }
+        return caminho.size() > 1 || origem.equals(destino) ? caminho : Collections.emptyList();
+    }
+
+    public String toDOT() {
+        StringBuilder sb = new StringBuilder(direcionado ? "digraph G {\n" : "graph G {\n");
+        Set<String> adicionadas = new HashSet<>();
+
+        for (Map.Entry<Vertice, List<Aresta>> entrada : adjacencias.entrySet()) {
+            Vertice origem = entrada.getKey();
+            for (Aresta aresta : entrada.getValue()) {
+                Vertice destino = aresta.getDestino();
+                String conector = direcionado ? " -> " : " -- ";
+                String representacao = origem + conector + destino + " [label=" + aresta.getPeso() + "]";
+                String reversa = destino + conector + origem + " [label=" + aresta.getPeso() + "]";
+                if (direcionado || (!adicionadas.contains(reversa))) {
+                    sb.append("  ").append(representacao).append(";\n");
+                    adicionadas.add(representacao);
+                }
+            }
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+    public int grau(String nome) {
+        Vertice v = new Vertice(nome);
+        List<Aresta> arestas = adjacencias.get(v);
+        return arestas != null ? arestas.size() : 0;
     }
 
     public int contarLacos() {
         int laços = 0;
-        for (Map.Entry<Vertice, Set<Vertice>> entrada : adjacencias.entrySet()) {
-            if (entrada.getValue().contains(entrada.getKey())) {
-                laços++;
+        for (Map.Entry<Vertice, List<Aresta>> entrada : adjacencias.entrySet()) {
+            Vertice v = entrada.getKey();
+            for (Aresta a : entrada.getValue()) {
+                if (a.getDestino().equals(v)) {
+                    laços++;
+                }
             }
         }
         return laços;
-    }    
-
-    public boolean ehCompleto() {
-        int n = adjacencias.size();
-        for (Map.Entry<Vertice, Set<Vertice>> entrada : adjacencias.entrySet()) {
-            if (entrada.getValue().size() != n - 1) {
-                return false;
-            }
-        }
-        return true;
-    }    
-
-    public int grau(String nome) {
-        Vertice v = new Vertice(nome);
-        return adjacencias.getOrDefault(v, Collections.emptySet()).size();
     }
 
-    public List<String> caminho(String origem, String destino) {
-        Vertice start = new Vertice(origem), end = new Vertice(destino);
-        Map<Vertice, Vertice> anterior = new HashMap<>();
-        Queue<Vertice> fila = new LinkedList<>();
-        Set<Vertice> visitado = new HashSet<>();
-        fila.add(start);
-        visitado.add(start);
-
-        while (!fila.isEmpty()) {
-            Vertice atual = fila.poll();
-            if (atual.equals(end)) break;
-            for (Vertice vizinho : adjacencias.getOrDefault(atual, new HashSet<>())) {
-                if (!visitado.contains(vizinho)) {
-                    fila.add(vizinho);
-                    visitado.add(vizinho);
-                    anterior.put(vizinho, atual);
-                }
-            }
-        }
-
-        List<String> caminho = new LinkedList<>();
-        for (Vertice v = end; v != null; v = anterior.get(v)) {
-            caminho.add(0, v.getNome());
-        }
-        return caminho.size() > 1 ? caminho : Collections.emptyList();
-    }
-
-    public String toDOT() {
-        StringBuilder sb = new StringBuilder("graph G {\n");
-        Set<String> adicionadas = new HashSet<>();
-        for (Map.Entry<Vertice, Set<Vertice>> entrada : adjacencias.entrySet()) {
-            for (Vertice vizinho : entrada.getValue()) {
-                String aresta = entrada.getKey() + " -- " + vizinho;
-                String reversa = vizinho + " -- " + entrada.getKey();
-                if (!adicionadas.contains(aresta) && !adicionadas.contains(reversa)) {
-                    sb.append("  ").append(aresta).append(";\n");
-                    adicionadas.add(aresta);
-                }
-            }
-        }
-        sb.append("}");
-        return sb.toString();
-    }    
 }

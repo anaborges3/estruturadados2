@@ -2,18 +2,16 @@ package br.edu.ifgoiano.grafos;
 
 public class Main {
     public static void main(String[] args) {
-        Grafo g = new Grafo();
+        Grafo g = new Grafo(true); // true = direcionado (dígrafo)
         g.adicionarVertice("A");
         g.adicionarVertice("B");
         g.adicionarVertice("C");
-        g.adicionarAresta("A", "B");
-        g.adicionarAresta("B", "C");
-        g.adicionarAresta("C", "A");
+        g.adicionarAresta("A", "B", 2);
+        g.adicionarAresta("B", "C", 3);
+        g.adicionarAresta("A", "C", 10);
 
-        System.out.println("Laços: " + g.contarLacos());
-        System.out.println("Grafo completo? " + g.ehCompleto());
-        System.out.println("Grau de B: " + g.grau("B"));
-        System.out.println("Caminho A -> C: " + g.caminho("A", "C"));
-        System.out.println("Formato DOT:\n" + g.toDOT());
+        System.out.println("Menor caminho A -> C: " + g.menorCaminho("A", "C"));
+        System.out.println("Formato DOT para edotor.net:\n" + g.toDOT());
     }
 }
+
